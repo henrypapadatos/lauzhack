@@ -3,7 +3,7 @@
 """
 @author : Romain Graux
 @date : 2022 December 03, 20:32:39
-@last modified : 2022 December 03, 23:19:02
+@last modified : 2022 December 04, 00:52:01
 """
 
 import sys
@@ -76,12 +76,13 @@ def speech_to_text(model, audio_fname, mapping=DefaultMapping):
     audio = whisper.pad_or_trim(audio)
     spectro = whisper.log_mel_spectrogram(audio)
     segment = model.encoder(spectro[None].to(mapping.encoder))
-    tokenizer = get_tokenizer('en', task="transcribe")
 
     options = DecodingOptions()
     results = model.decode(segment.to(mapping.decoder), options)
 
-    return tokenizer.decode(results[0].tokens), results[0].language
+    language = results[0].language
+    tokenizer = get_tokenizer(language, task="transcribe")
+    return tokenizer.decode(results[0].tokens), language
 
 def text_to_summary(text, language='en'):
     openai.api_key = "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"

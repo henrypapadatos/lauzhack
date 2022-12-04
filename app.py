@@ -3,7 +3,7 @@
 """
 @author : Romain Graux
 @date : 2022 December 03, 22:49:19
-@last modified : 2022 December 04, 11:08:18
+@last modified : 2022 December 04, 11:36:44
 """
 
 import gradio as gr
@@ -32,8 +32,9 @@ def transcribe(audio, mic, yt):
     return txt, language
 
 def transcribe_elem(elem):
-    if elem.startswith("https://www.youtube.com"):
-        fname = transcribe_from_yt(yt)
+    if elem.startswith("http"):
+        fname = transcribe_from_yt(elem)
+        print(f"downloaded {fname}")
         txt, language = speech_to_text(model, fname, mapping=mapping)
         return txt, language
     return speech_to_text(model, elem, mapping=mapping)

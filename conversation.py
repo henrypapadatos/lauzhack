@@ -1,4 +1,9 @@
 import openai
+from functools import lru_cache
+from typing import Union
+
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 class Conversation:
 
@@ -78,8 +83,18 @@ class Conversation:
         self.language:str = language
         self.conversation:list = []
         self.subject_list:list = []
+        self.model: str = model
 
-    def call_gpt(self,prompt:str) -> str:
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def load_bloomz_model(device: str = "cuda:1") -> Union[AutoTokenizer, AutoModelForCausalLM]:
+        checkpoint = 'bigscience/bloomz-3b'
+        tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+        device_map = 'balanced_low_0' if device not in ['cpu', 'cuda:0'] else "auto"
+        model = AutoModelForCausalLM.from_pretrained(checkpoint, torch_dtype="auto", device_map=device_map).to(device)
+        return tokenizer, model
+
+    def call_gpt(self, prompt:str) -> str:
         output = openai.Completion.create(engine="text-davinci-003",
                                           prompt=prompt,
                                           temperature=0.0,
@@ -87,10 +102,24 @@ class Conversation:
                                           ).choices[0].text.replace("\n","",2)
         return output
 
+    def call_bloomz(self, prompt:str) -> str:
+        device = 'cuda:1'
+        bloomz_tokenizer, bloomz_model = Conversation.load_bloomz_model(device)
+        inputs = bloomz_tokenizer.encode(prompt, return_tensors="pt").to(device)
+        output_tokens = bloomz_model.generate(inputs, max_length=500)
+        output = bloomz_tokenizer.decode(output_tokens[0])
+        return output
+
+    def call_model(self, prompt:str) -> str:
+        if self.model == 'gpt3':
+            return self.call_gpt(prompt)
+        else:
+            return self.call_bloomz(prompt)
+
     def ask_question(self,question:str) -> str:
         task = self.answer_task.get(self.language, self.answer_task['en'])
         prompt = self.explanations + " \\n \\n" + task + question
-        answer = self.call_gpt(prompt)
+        answer = self.call_model(prompt)
         self.conversation.append(question)
         self.conversation.append(answer)
         return answer
@@ -98,7 +127,7 @@ class Conversation:
     def generate_subject_list(self) -> None:
         task = self.subject_task.get(self.language, self.subject_task['en'])
         prompt = self.explanations + "\\n" + task
-        subjects = self.call_gpt(prompt)
+        subjects = self.call_model(prompt)
         subject_list_raw = subjects.split("\n")
         self.subject_list = [subject.split(" ",1)[1] for subject in subject_list_raw]
 
@@ -108,14 +137,14 @@ class Conversation:
         subject = self.subject_list.pop(0)
         task = self.question_task.get(self.language, self.question_task['en'])(subject)
         prompt = self.explanations + " \\n \\n" + task
-        question = self.call_gpt(prompt)
+        question = self.call_model(prompt)
         self.conversation.append(question)
         return question
 
     def evalutate_answer(self,question:str,answer:str) -> str:
         task = self.evaluation_task.get(self.language, self.evaluation_task['en'])(answer,question)
         prompt = self.explanations + " \\n \\n" + task
-        correction = self.call_gpt(prompt)
+        correction = self.call_model(prompt)
         if question != self.conversation[-1]:
             self.conversation.append(question)
         self.conversation.append(answer)

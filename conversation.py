@@ -62,6 +62,26 @@ class Conversation:
     "id": "  Ekstrak ide utama dari pesan ini."
     }
 
+    evaluation_task = {
+    "en": lambda x, y: "Given those previous explanations, I answered {} to this question: {}. Tell me first if I am right or wrong and then give the right answer of the question".format(x,y), 
+    "zh": "  从这条消息中提取主要思想。", 
+    "de": "  Holen Sie die wichtigsten Ideen aus dieser Nachricht heraus.", 
+    "es": "  Extraer las ideas principales de este mensaje.", 
+    "ru": "  Извлеките основные идеи из этого сообщения.", 
+    "ko": " 이 메시지에서 주요 아이디어를 추출하십시오.", 
+    "fr": "  Extraire les idées principales de ce message.", 
+    "ja": "  このメッセージから主要なアイデアを抽出してください。", 
+    "pt": "  Extraia as ideias principais desta mensagem.", 
+    "tr": "  Bu mesajdan ana fikirleri çikarin.", 
+    "pl": "  Wyciągnij główne idee z tej wiadomości.", 
+    "ca": "  Extreu les idees principals daquest missatge.", 
+    "nl": "  Het hoofdidee uit dit bericht extraheren.", 
+    "ar": " استخرج الأفكار الرئيسية من هذه الرسالة", 
+    "sv": "  Extrahera de viktigaste idéerna ur det här meddelandet.", 
+    "it": "  Estrai le idee principali da questo messaggio.", 
+    "id": "  Ekstrak ide utama dari pesan ini."
+    }
+
     def __init__(self,explanations:str,
                  language:str="en") -> None:
         openai.api_key = "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"
@@ -98,7 +118,17 @@ class Conversation:
             self.generate_subject_list()
         subject = self.subject_list.pop(0)
         task = self.question_task.get(self.language, self.question_task['en'])(subject)
-        prompt = self.explanations + "\\n" + task
+        prompt = self.explanations + " \\n \\n" + task
         question = self.call_gpt(prompt)
         self.conversation.append(question)
         return question
+
+    def evalutate_answer(self,question:str,answer:str) -> str:
+        task = self.evaluation_task.get(self.language, self.evaluation_task['en'])(answer,question)
+        prompt = self.explanations + " \\n \\n" + task
+        correction = self.call_gpt(prompt)
+        if question != self.conversation[-1]:
+            self.conversation.append(question)
+        self.conversation.append(answer)
+        self.conversation.append(correction)
+        return correction

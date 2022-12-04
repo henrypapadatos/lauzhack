@@ -3,7 +3,7 @@
 """
 @author : Romain Graux
 @date : 2022 December 03, 22:49:19
-@last modified : 2022 December 04, 05:56:31
+@last modified : 2022 December 04, 11:08:18
 """
 
 import gradio as gr
@@ -19,6 +19,7 @@ class mapping(DefaultMapping):
 
 model = load_model(mapping=mapping)
 conv_bot : Conversation = None
+ANSWERING_QUESTION : bool = False
 
 def transcribe(audio, mic, yt):
     if audio is not None:
@@ -29,6 +30,13 @@ def transcribe(audio, mic, yt):
         fname = transcribe_from_yt(yt)
         txt, language = speech_to_text(model, fname, mapping=mapping)
     return txt, language
+
+def transcribe_elem(elem):
+    if elem.startswith("https://www.youtube.com"):
+        fname = transcribe_from_yt(yt)
+        txt, language = speech_to_text(model, fname, mapping=mapping)
+        return txt, language
+    return speech_to_text(model, elem, mapping=mapping)
 
 def transcribe_from_yt(url):
     fname = download_from_youtube(url)
@@ -90,6 +98,7 @@ with gr.Blocks() as demo:
                   font-size: 1.75rem;
                 "
               >
+              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fassets.stickpng.com%2Fimages%2F5cb78e867ff3656569c8cebe.png&amp;f=1&amp;nofb=1&amp;ipt=831c752b0124affd660dd2a89d56aa5278ba88ea6e089d6daf04eb3aedbf3396&amp;ipo=images" style="align-self: center;margin: 0 auto;" width="50px" height="50px">
                 <h1 style="font-weight: 900; margin-bottom: 7px;">
                   Patrick
                 </h1>
@@ -116,7 +125,7 @@ with gr.Blocks() as demo:
                 mic = gr.Audio(source="microphone", type="filepath", label="Microphone")
             with gr.Tab("YouTube"):
                 youtube = gr.Textbox(label="YouTube URL", lines=1, placeholder="https://www.youtube.com/watch?v=f_NoW_npKMA&ab_channel=HenryPapadatos")
-            transcribe_btn = gr.Button("Transcribe")
+            # transcribe_btn = gr.Button("Transcribe")
             with gr.Accordion("Transcription", collapsed=True):
                 transcription_txt = gr.Markdown(label=None)
         with gr.Column():
@@ -133,9 +142,10 @@ with gr.Blocks() as demo:
                     ask = gr.Button("Ask me a question")
                     ask.click(ask_a_question, [chat_state, transcription_txt, language_state], [chatbot, chat_state])
                     
-
-
-    transcribe_btn.click(transcribe, [audio, mic, youtube], [transcription_txt, language_state])
+    # transcribe_btn.click(transcribe, [audio, mic, youtube], [transcription_txt, language_state])
+    audio.change(transcribe_elem, audio, [transcription_txt, language_state])
+    mic.change(transcribe_elem, mic, [transcription_txt, language_state])
+    youtube.change(transcribe_elem, youtube, [transcription_txt, language_state])
     summary_btn.click(summarize, [transcription_txt, language_state], summary_txt)
 
-demo.launch()
+demo.launch(server_name="0.0.0.0")

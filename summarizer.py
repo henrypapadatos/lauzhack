@@ -91,7 +91,7 @@ def speech_to_text(model, audio_fname, mapping=DefaultMapping):
     return transcription['text'], transcription['language']
 
 def text_to_summary(text, language='en'):
-    openai.api_key = "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"
+    openai.api_key = "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"
 
     task = tasks.get(language, tasks['en'])
 

@@ -73,7 +73,7 @@ class Conversation:
 
     def __init__(self,explanations:str,
                  language:str="en") -> None:
-        openai.api_key = "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"
+        openai.api_key = "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"
         self.explanations:str = explanations
         self.language:str = language
         self.conversation:list = []

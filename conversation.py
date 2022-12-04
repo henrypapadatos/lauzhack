@@ -37,7 +37,7 @@ class Conversation:
     }
 
     question_task = {
-    "en": lambda x: "Given those previous explanations, ask me questions about {} to evaluate my understanding of the explanations".format(x),
+    "en": lambda x: "Given those previous explanations, ask me one question about {} to evaluate my understanding of the explanations".format(x),
     "zh": lambda x: "  鉴于之前的解释，向我提出关于以下方面的问题 {} 以评估我对解释的理解。".format(x),
     "de": lambda x: "  Stellen Sie mir angesichts der vorangegangenen Erklärungen Fragen zu {}, um mein Verständnis der Erklärungen zu bewerten".format(x),
     "es": lambda x: "  Dadas esas explicaciones previas, hágame preguntas sobre {} para evaluar mi comprensión de las explicaciones.".format(x),

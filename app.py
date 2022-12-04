@@ -14,8 +14,8 @@ from conversation import Conversation
 css = open("style.css", "r").read()
 
 class mapping(DefaultMapping):
-    encoder = 'cuda:0'
-    decoder = 'cuda:0'
+    encoder = 'cpu'
+    decoder = 'cpu'
 
 model = load_model(mapping=mapping)
 conv_bot : Conversation = None
@@ -41,6 +41,8 @@ def summarize(transcription, language):
 
 def chat(message, history, transcription, language):
     global conv_bot
+    global ANSWERING_QUESTION
+    ANSWERING_QUESTION = ANSWERING_QUESTION or False
     history = history or []
     language = language or 'en'
 
@@ -49,9 +51,32 @@ def chat(message, history, transcription, language):
         conv_bot = Conversation(transcription)
         history = []
 
-    response = conv_bot.ask_question(message)
+    if ANSWERING_QUESTION:
+        question = history[-1][1]
+        response = conv_bot.evalutate_answer(question,message)
+    else:
+        response = conv_bot.ask_question(message)
     history.append((message, response))
+    ANSWERING_QUESTION = False
     return history, history
+
+
+def ask_a_question(history, transcription, language):
+    global conv_bot
+    global ANSWERING_QUESTION
+    history = history or []
+    language = language or 'en'
+
+    conv_bot = conv_bot or Conversation(transcription, language)
+    if conv_bot.explanations != transcription:
+        conv_bot = Conversation(transcription,language)
+        history = []
+
+    question = conv_bot.evaluate_understanding()
+    history.append(("Ask me a question", question))
+    ANSWERING_QUESTION = True
+    return history, history
+
 
 with gr.Blocks() as demo:
     language_state = gr.State()
@@ -104,8 +129,13 @@ with gr.Blocks() as demo:
                 chat_state = gr.State()
                 chatbot = gr.Chatbot().style(color_map=("#bd3a8a", "#1069db"))
                 submit.click(chat, [message, chat_state, transcription_txt, language_state], [chatbot, chat_state])
+                with gr.Row():
+                    ask = gr.Button("Ask me a question")
+                    ask.click(ask_a_question, [chat_state, transcription_txt, language_state], [chatbot, chat_state])
+                    
+
 
     transcribe_btn.click(transcribe, [audio, mic, youtube], [transcription_txt, language_state])
     summary_btn.click(summarize, [transcription_txt, language_state], summary_txt)
 
-demo.launch(server_name="0.0.0.0")
+demo.launch()

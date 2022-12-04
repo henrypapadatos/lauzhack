@@ -3,7 +3,7 @@
 """
 @author : Romain Graux
 @date : 2022 December 03, 20:32:39
-@last modified : 2022 December 04, 00:52:01
+@last modified : 2022 December 04, 03:23:37
 """
 
 import sys
@@ -82,7 +82,7 @@ def speech_to_text(model, audio_fname, mapping=DefaultMapping):
 
     language = results[0].language
     tokenizer = get_tokenizer(language, task="transcribe")
-    return tokenizer.decode(results[0].tokens), language
+    return tokenizer.decode(results[0].tokens).strip(), language
 
 def text_to_summary(text, language='en'):
     openai.api_key = "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"
@@ -98,7 +98,7 @@ def text_to_summary(text, language='en'):
         max_tokens=512
         )
 
-    return response.choices[0].text
+    return response.choices[0].text.strip()
 
 def speech_to_summary_conditional(model, audio_fname, length_condition, mapping=DefaultMapping):
     text, language = speech_to_text(model, audio_fname, mapping)

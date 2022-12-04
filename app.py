@@ -14,8 +14,8 @@ from conversation import Conversation
 css = open("style.css", "r").read()
 
 class mapping(DefaultMapping):
-    encoder = 'cpu'
-    decoder = 'cpu'
+    encoder = 'cuda:0'
+    decoder = 'cuda:0'
 
 model = load_model(mapping=mapping)
 conv_bot : Conversation = None

@@ -1,0 +1,22 @@
+root {
+    # Define the font family for the entire document
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    # Define the font size for the entire document
+    font-size: 14px;
+    # Define the line height for the entire document
+    line-height: 1.428571429;
+}
+
+h1 h2 {
+    align-items: center;
+    margin: 0 auto;
+}
+
+.rounded-br-none {
+    background: linear-gradient(to right, #1069db 85%, #bd3a8a 100%);
+}
+
+
+.rounded-bl-none {
+    background: linear-gradient(to bottom, #1069db 85%, #bd3a8a 100%);
+}

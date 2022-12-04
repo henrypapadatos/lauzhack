@@ -7,7 +7,7 @@ def download_from_youtube(url = "https://www.youtube.com/watch?v=f_NoW_npKMA&ab_
     destination = '.'
     out_file = video.download(output_path=destination)
     base, ext = os.path.splitext(out_file)
-    new_file = base + '.mp3'
+    new_file = base + '.wav'
     os.rename(out_file, new_file)
     print(yt.title + " has been successfully downloaded.")
 

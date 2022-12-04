@@ -43,7 +43,7 @@ class Conversation:
     "es": lambda x: "  Dadas esas explicaciones previas, hágame preguntas sobre {} para evaluar mi comprensión de las explicaciones.".format(x),
     "ru": lambda x: "  Учитывая предыдущие объяснения, задайте мне вопросы о {}, чтобы оценить мое понимание объяснений".format(x),
     "ko": lambda x: "  이 메시지에서 주요 아이디어를 추출하십시오.".format(x),
-    "fr": lambda x: "  Compte tenu de ces explications précédentes, posez-moi des questions sur {} pour évaluer ma compréhension des explications..".format(x),
+    "fr": lambda x: "  Compte tenu de ces explications précédentes, posez-moi des questions sur {} pour évaluer ma compréhension".format(x),
     "ja": lambda x: "  それらの前の説明を踏まえて、{}について質問して、私の説明の理解度を評価してください。".format(x),
     "pt": lambda x: "  Dadas as explicações anteriores, fazer-me perguntas sobre {} para avaliar a minha compreensão das explicações.".format(x),
     "tr": lambda x: "  Önceki açıklamaları göz önünde bulundurarak, açıklamaları anladığımı değerlendirmek için bana {} hakkında sorular sorun.".format(x),

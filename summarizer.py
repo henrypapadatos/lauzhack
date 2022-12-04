@@ -3,7 +3,7 @@
 """
 @author : Romain Graux
 @date : 2022 December 03, 20:32:39
-@last modified : 2022 December 04, 03:23:37
+@last modified : 2022 December 04, 10:37:33
 """
 
 import sys
@@ -72,17 +72,23 @@ def delete_file(arg_idx=0):
 @torch.no_grad()
 @delete_file(arg_idx=1)
 def speech_to_text(model, audio_fname, mapping=DefaultMapping):
-    audio = whisper.load_audio(audio_fname)
-    audio = whisper.pad_or_trim(audio)
-    spectro = whisper.log_mel_spectrogram(audio)
-    segment = model.encoder(spectro[None].to(mapping.encoder))
+    # audio = whisper.load_audio(audio_fname)
+    # audio = whisper.pad_or_trim(audio)
+    # spectro = whisper.log_mel_spectrogram(audio)
+    # print(spectro.shape)
+    # segment = model.encoder(spectro[None].to(mapping.encoder))
 
-    options = DecodingOptions()
-    results = model.decode(segment.to(mapping.decoder), options)
+    # options = DecodingOptions(
+    #             sample_len=1024,
+    #         )
+    # results = model.decode(segment.to(mapping.decoder), options)
 
-    language = results[0].language
-    tokenizer = get_tokenizer(language, task="transcribe")
-    return tokenizer.decode(results[0].tokens).strip(), language
+    # language = results[0].language
+    # tokenizer = get_tokenizer(language, task="transcribe")
+    # result = ''.join([tokenizer.decode(result.tokens).strip() for result in results])
+    # print(f"{len(results)} observations : {result}")
+    transcription = model.transcribe(audio_fname)
+    return transcription['text'], transcription['language']
 
 def text_to_summary(text, language='en'):
     openai.api_key = "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"
